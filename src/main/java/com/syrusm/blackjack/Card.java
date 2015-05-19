@@ -8,7 +8,7 @@ package com.syrusm.blackjack;
 
 public class Card {
 
-    // setup Suit enum such that toString prints out the Suit symbol
+    // setup Suit enum such that toString prints out the Suit symbol if the font in use supports them
     public static enum Suit {
         SPADES("\u2660"),
         HEARTS("\u2764"),

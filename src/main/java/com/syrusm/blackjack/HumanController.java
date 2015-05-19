@@ -26,15 +26,18 @@ public class HumanController extends Controller {
         while (true) {
             Console.showMessage("\tIt is your turn, 'H' to Hit or 'S' to Stay, 'Q' to quit: ");
             String input = Console.getUserInput();
-
-            if (input.equalsIgnoreCase("H")) {
-                action = Action.HIT;
-                break;
-            } else if (input.equalsIgnoreCase("S")) {
-                action = Action.STAY;
-                break;
-            } else if (input.equalsIgnoreCase("Q")) {
-                throw new ExitException("User request exit");
+            if (input != null) {
+                if (input.equalsIgnoreCase("H")) {
+                    action = Action.HIT;
+                    break;
+                } else if (input.equalsIgnoreCase("S")) {
+                    action = Action.STAY;
+                    break;
+                } else if (input.equalsIgnoreCase("Q")) {
+                    throw new ExitException("User request exit");
+                }
+            } else {
+                throw new NullPointerException("could not read from inputstream");
             }
         }
 

@@ -105,7 +105,7 @@ public class Game {
     private void showPlayersHands(Player currentPlayer) {
         // make the player currently playing draw last to make it easier to follow when cards are added
         Player other = (currentPlayer == getHouse())? getPlayer(): getHouse();
-        Console.showMessage(other.toString() + "\t\t" + currentPlayer.toString() + ", ?");
+        Console.showMessage(other.toString() + "\t\t" + currentPlayer.toString());
     }
 
     // game loop

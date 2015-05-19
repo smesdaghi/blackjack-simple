@@ -3,7 +3,8 @@ package com.syrusm.blackjack;
 /**
  * A Controller's actions affects the player. For example, a HumanController allows a human to choose to Hit or Stay,
  * as well as exit the game. Similarly, An AIController causes a player to get another card or even exit the game.
- * @see HumanController, AIController
+ * @see HumanController
+ * @see com.syrusm.blackjack.AIController
  */
 public abstract class Controller {
 
