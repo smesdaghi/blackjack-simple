@@ -1,17 +1,20 @@
 package com.syrusm.blackjack;
 
-public abstract class Player {
+/**
+ * A Player represents one of the players in the game which include the house player. It is simply a container for
+ * a Hand, name, and Controller.
+ *
+ * @see Hand
+ * @see Controller
+ */
+public class Player {
+
     protected Hand hand;
     protected String name;
-    protected boolean isAI = false;
-
-    public static enum Action {
-        HIT,
-        STAY
-    }
+    protected Controller controller;
 
     public Player() {
-        this("Unnamed");
+        this("player");
     }
 
     public Player(String name) {
@@ -23,15 +26,25 @@ public abstract class Player {
         return hand;
     }
 
-    public boolean getIsAI() {
-        return isAI;
-    }
-
     public String getName() {
         return name;
     }
 
-    public abstract Action play() throws ExitException;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Controller getController() {
+        return controller;
+    }
+
+    public void setController(Controller controller) {
+        this.controller = controller;
+    }
+
+    public boolean isAI() {
+        return controller != null && controller.getIsAI();
+    }
 
     public String toString() {
         return name + ": " + hand;

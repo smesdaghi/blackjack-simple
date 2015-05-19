@@ -1,22 +1,18 @@
 package com.syrusm.blackjack;
 
+/**
+ * HumanController is used by a person to control a player
+ */
+public class HumanController extends Controller {
 
-public class HumanPlayer extends Player {
-
-    private static int humanCounter = 0;
-
-    public HumanPlayer(String name) {
-        super(name);
-    }
-
-    public HumanPlayer() {
-        this("Human " + humanCounter++);
+    public HumanController(Player player) {
+        super(player);
     }
 
     public Action play() throws ExitException{
         Action action = Action.STAY;
 
-        int value = getHand().getValueBest();
+        int value = player.getHand().getValueBest();
         if (value < Hand.WIN_VALUE_21) {
             action = getAction();
         }
