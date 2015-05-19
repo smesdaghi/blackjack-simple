@@ -4,6 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+/**
+ * Interface to the user. display and read user input.
+ */
 public class Console {
 
     public static void showMessage(String message) {

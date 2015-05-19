@@ -2,14 +2,16 @@ package com.syrusm.blackjack;
 
 import java.util.ArrayList;
 
+/**
+ * Represents a set of cards that "belong" to each player.
+ */
 public class Hand {
     private ArrayList<Card> cards = new ArrayList<Card>();
+
+    // The value of a hand depends on the game being played. These are specific to blackjack
     public static final int WIN_VALUE_21 = 21;
     public static final int ACE_HIGH_VALUE = 11;
     public static final int PICTURE_VALUE = 10;
-
-    public Hand() {
-    }
 
     public void addCard(final Card card) {
         cards.add(card);
@@ -17,8 +19,8 @@ public class Hand {
 
     /**
      * returns the card at a given index if such card exists, otherwise returns null
-     * @param index
-     * @return
+     * @param index of the card to retrieve
+     * @return card at a given index
      */
     public Card getCard(int index) {
         Card card = null;
@@ -26,7 +28,7 @@ public class Hand {
             card = cards.get(index);
         }
         return card;
-    };
+    }
 
     public void clear() {
         cards.clear();
@@ -34,12 +36,12 @@ public class Hand {
 
     /**
      * get the lowest possible value represented by hand by Assuming all Aces are '1'
-     * @return
+     * @return value
      */
     public int getValueLow() {
         int value = 0;
         for (Card card: cards) {
-            value += evaluateRank(card.getRank(), false /* for now*/);
+            value += evaluateRank(card.getRank(), false /* assume low ace */);
         }
         return value;
     }
@@ -47,7 +49,7 @@ public class Hand {
     /**
      * get the 'best' value of the hand by figuring out how many aces to count as '1'
      * in order to make the hand as high as possible but equal to or less than 21
-     * @return
+     * @return value
      */
     public int getValueBest() {
         int aceCount = 0;
@@ -73,6 +75,7 @@ public class Hand {
         return getValueLow() > WIN_VALUE_21;
     }
 
+    // given a card rank, return the value of it in blackjack [2..10] and 1 or 11 for ace
     static private int evaluateRank(Card.Rank rank, boolean aceIsHighest) {
         int value = rank.getValue();
 

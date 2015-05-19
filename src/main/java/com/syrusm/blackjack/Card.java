@@ -1,11 +1,10 @@
 package com.syrusm.blackjack;
 
 /**
- *  represents a single card.
+ *  represents a single card which has a Suit and a Rank as well as whether the face is hidden or not.
  */
 
 // TODO: make sure params are final!!!
-// private contsructo needed if other defined and ?
 
 public class Card {
 
@@ -60,16 +59,16 @@ public class Card {
         }
     }
 
-    /*
-     * Even though suit is not critical for some card games, it is important if there is any sort of UI
-     * and it also does affect user experience. Many people remember cards by their rank + suit as opposed
-     * to counting how many of each rank they have seen.
-     */
+
+     // Even though suit is not critical for some card games, it is important if there is any sort of UI
+     // and it also does affect user experience. Many people remember cards by their rank + suit as opposed
+     // to counting how many of each rank they have seen.
     private Suit suit;
     private Rank rank;
     private boolean hidden = false;
-    private static final String SYMBOL_HIDDEN = "\u2588";
 
+    // a full block meaning the card face is "hidden"
+    private static final String SYMBOL_HIDDEN = "\u2588";
 
     public Card(Rank rank, Suit suit) {
         this.rank = rank;
@@ -92,9 +91,12 @@ public class Card {
         hidden = value;
     }
 
+    /**
+     * @return String representing the card where the string contains suit symbols and ranks if the card is not hidden
+     */
     @Override
     public String toString() {
-        String string = "";
+        String string;
         if (hidden) {
             string = SYMBOL_HIDDEN;
         } else {

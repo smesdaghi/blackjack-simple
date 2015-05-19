@@ -43,7 +43,7 @@ public class CardTest {
         aceOfSpades.setHidden(!aceOfSpades.getHidden());
 
         // ensure the toStrings are different
-        assertTrue(string != aceOfSpades.toString());
+        assertTrue(!string.equals(aceOfSpades.toString()));
     }
 
     @Test

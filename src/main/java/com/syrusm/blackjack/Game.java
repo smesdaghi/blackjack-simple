@@ -1,13 +1,20 @@
 package com.syrusm.blackjack;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
+/**
+ *  Entry point for the application, it can initialize and run a game.
+ */
 public class Game {
 
+    // the single deck used for the game
+    private Deck deck;
+    // list of all Player instances which includes both house and human/ai player
+    private ArrayList<Player> players;
+    // Singleton instance
     private static Game instance;
-
-    Deck deck;
-    ArrayList<Player> players;
 
     public static void createInstance() {
         instance = new Game();
@@ -17,10 +24,13 @@ public class Game {
         return instance;
     }
 
-    public Player getHousePlayer() {
+    /**
+     * @return the house player.
+     */
+    public Player getHouse() {
         Player player = null;
         for (Player p: players) {
-            if (p instanceof HouseAIPlayer) {
+            if (p.getController() instanceof AIHouseController) {
                 player = p;
                 break;
             }
@@ -28,10 +38,13 @@ public class Game {
         return player;
     }
 
-    public Player getHumanPlayer() {
+    /**
+     * @return the non-house player a.k.a "the" player
+     */
+    public Player getPlayer() {
         Player player = null;
         for (Player p: players) {
-            if (p instanceof HumanPlayer) {
+            if (!(p.getController() instanceof AIHouseController)) {
                 player = p;
                 break;
             }
@@ -39,52 +52,85 @@ public class Game {
         return player;
     }
 
+    /**
+     * create a player with a controller based on the provided controller class
+     * @param name of the player
+     * @param controllerClass type of controller to instantiate
+     * @return player
+     */
+
+    public Player CreatePlayer(String name, Class<?> controllerClass) {
+        Player player = new Player(name);
+        Controller controller = null;
+        try {
+            Constructor constructor = controllerClass.getDeclaredConstructor(Player.class);
+            constructor.setAccessible(true);
+            controller = (Controller)constructor.newInstance(player);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+
+        // No controller, no player
+        if (controller == null) {
+            player = null;
+        }
+
+        return player;
+    }
+
+    /**
+     * @param humanVsHouse when true, the player going against the house will be controlled
+     *                     by a human. It will be AI controlled otherwise.
+     */
     public void init(boolean humanVsHouse) {
         deck = new Deck();
-        players = new ArrayList(2);
+        players = new ArrayList<Player>(2);
 
         if (humanVsHouse) {
-            players.add(new HumanPlayer("You"));
+            players.add(CreatePlayer("You", HumanController.class));
         } else {
-            // if AI playing instead of human, run 10 times
-            players.add(new HumanAIPlayer("HumanAI", 10));
+            players.add(CreatePlayer("AIPlayer", AIPlayerController.class));
         }
 
         //add house as last player since she needs to play last
-        players.add(new HouseAIPlayer());
+        players.add(CreatePlayer("AIHouse", AIHouseController.class));
     }
 
     private void showPlayersHands(Player currentPlayer) {
         // make the player currently playing draw last to make it easier to follow when cards are added
-        Player other = (currentPlayer == getHousePlayer())? getHumanPlayer():getHousePlayer();
+        Player other = (currentPlayer == getHouse())? getPlayer(): getHouse();
         Console.showMessage(other.toString() + "\t\t" + currentPlayer.toString() + ", ?");
     }
 
     // game loop
     public void run() throws ExitException{
-        //exit game with exception
+        // only exit game when there is an exception
         while (true) {
             runOneRound();
         }
     }
 
-    public void runOneRound() throws ExitException{
-        Player human = getHumanPlayer();
-        Player house = getHousePlayer();
+    public Player runOneRound() throws ExitException{
+        Player player = getPlayer();
+        Player house = getHouse();
 
         Console.showMessage("\n\t--== Starting new game ==--");
         deck.shuffle();
-        sleep(1000);
         Console.showMessage("\t  -- Shuffle Complete --");
-        sleep(500);
 
         for (Player p : players) {
             p.getHand().clear();
         }
 
-        // deal two cards to  human player
-        human.getHand().addCard(deck.getNextCard());
-        human.getHand().addCard(deck.getNextCard());
+        // deal two cards to  player
+        player.getHand().addCard(deck.getNextCard());
+        player.getHand().addCard(deck.getNextCard());
 
         // house player will receive cards last
         Card next = deck.getNextCard();
@@ -94,7 +140,7 @@ public class Game {
 
         // anyone lucky right off the bat on the first two dealt cards?
         if (house.getHand().getValueBest() == Hand.WIN_VALUE_21 ||
-                human.getHand().getValueBest() == Hand.WIN_VALUE_21) {
+                player.getHand().getValueBest() == Hand.WIN_VALUE_21) {
             // round is over already
             house.getHand().getCard(0).setHidden(false);
             showPlayersHands(house);
@@ -111,14 +157,9 @@ public class Game {
                 while (true) {
                     showPlayersHands(p);
 
-                    Player.Action action = p.play();
+                    Controller.Action action = p.getController().play();
 
-                    // if AI just played, act slow, a.k.a. a human.
-                    if (p.getIsAI()) {
-                        sleep(2000);
-                    }
-
-                    if (action == Player.Action.STAY) {
+                    if (action == Controller.Action.STAY) {
                         break;
                     }
 
@@ -135,31 +176,32 @@ public class Game {
             }
         }
 
-        if (house.getHand().isBust() || human.getHand().isBust()) {
-            if (!human.getHand().isBust()) {
+        Player winner = null;
+        if (house.getHand().isBust() || player.getHand().isBust()) {
+            if (!player.getHand().isBust()) {
+                winner = player;
                 Console.showMessage("\tYou Win!");
             } else if (!house.getHand().isBust()){
+                winner = house;
                 Console.showMessage("\tYou Lose");
             } else {
-                // If both players bust, the dealer wins
+                // If both players bust, the house wins
+                winner = house;
                 Console.showMessage("\tBoth bust, You Lost");
             }
-        }else if (house.getHand().getValueBest() == human.getHand().getValueBest()) {
+        } else if (house.getHand().getValueBest() == player.getHand().getValueBest()) {
             // If both players have the same score, they tie
+            winner = null;
             Console.showMessage("\tThe round was a tie!");
-        } else if (house.getHand().getValueBest() < human.getHand().getValueBest()) {
+        } else if (house.getHand().getValueBest() < player.getHand().getValueBest()) {
+            winner = player;
             Console.showMessage("\tYou Win!");
         } else {
+            winner = house;
             Console.showMessage("\tYou Lost");
         }
-    }
 
-    public static void sleep(int milliseconds) {
-        try {
-            Thread.sleep(milliseconds);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        return winner;
     }
 
     public static void main(String [] args) {

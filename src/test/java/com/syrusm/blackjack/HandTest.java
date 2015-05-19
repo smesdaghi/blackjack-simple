@@ -1,8 +1,5 @@
 package com.syrusm.blackjack;
 
-import com.syrusm.blackjack.Card;
-import com.syrusm.blackjack.Hand;
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertNotNull;
@@ -14,7 +11,6 @@ public class HandTest {
     public void testEmptyHand(){
         Hand hand = new Hand();
         assertTrue(hand.getValueLow() == 0);
-        //TODO: should it be null?
         assertTrue(hand.toString().equals(""));
 
         hand.addCard(new Card(Card.Rank.ACE, Card.Suit.SPADES));
